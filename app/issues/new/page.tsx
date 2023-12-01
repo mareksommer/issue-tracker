@@ -3,19 +3,21 @@ import axios from "axios";
 import { Button, Callout, TextField } from "@radix-ui/themes";
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller} from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createIssueSchema } from "../../validationSchemas";
 import { z } from "zod";
 import ErrorMessage from "@/app/components/ErrorMessage";
+import Spinner from "@/app/components/Spinner";
 
 type IssueForm = z.infer<typeof createIssueSchema>;
 
 function NewIssuePage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     control,
@@ -26,12 +28,14 @@ function NewIssuePage() {
   });
 
   const submitForm = async (data: IssueForm) => {
+    setIsSubmitting(true);
     try {
       await axios.post("/api/issues", data);
       router.push("/issues");
     } catch (error) {
       setError("Unexpected error occured");
     }
+    setIsSubmitting(false);
   };
   return (
     <div className="max-w-xl space-y-3">
@@ -56,7 +60,7 @@ function NewIssuePage() {
           )}
         />
         <ErrorMessage>{errors.description?.message}</ErrorMessage>
-        <Button>Submit New Issue</Button>
+        <Button disabled={isSubmitting}>Submit New Issue{isSubmitting && <Spinner />}</Button>
       </form>
     </div>
   );
