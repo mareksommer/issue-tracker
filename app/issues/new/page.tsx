@@ -1,9 +1,9 @@
 "use client";
 import axios from "axios";
 import { Button, Callout, TextField } from "@radix-ui/themes";
-import SimpleMDE from "react-simplemde-editor";
+import dynamic from "next/dynamic";
 import "easymde/dist/easymde.min.css";
-import { useForm, Controller} from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,9 @@ import { z } from "zod";
 import ErrorMessage from "@/app/components/ErrorMessage";
 import Spinner from "@/app/components/Spinner";
 
+const SimpleMDE = dynamic(() => import("react-simplemde-editor"), {
+  ssr: false,
+});
 type IssueForm = z.infer<typeof createIssueSchema>;
 
 function NewIssuePage() {
@@ -60,7 +63,9 @@ function NewIssuePage() {
           )}
         />
         <ErrorMessage>{errors.description?.message}</ErrorMessage>
-        <Button disabled={isSubmitting}>Submit New Issue{isSubmitting && <Spinner />}</Button>
+        <Button disabled={isSubmitting}>
+          Submit New Issue{isSubmitting && <Spinner />}
+        </Button>
       </form>
     </div>
   );
