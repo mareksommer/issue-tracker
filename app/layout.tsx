@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Theme } from "@radix-ui/themes";
+import { Container, Theme } from "@radix-ui/themes";
 import { Inter } from "next/font/google";
 import "@radix-ui/themes/styles.css";
 import "./theme-config.css";
@@ -8,9 +8,9 @@ import "./globals.css";
 import NavBar from "./NavBar";
 
 const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +28,9 @@ export default function RootLayout({
       <body>
         <Theme>
           <NavBar />
-          <main className="p-5">{children}</main>
+          <main className="p-5">
+            <Container>{children}</Container>
+          </main>
         </Theme>
       </body>
     </html>
