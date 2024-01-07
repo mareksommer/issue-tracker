@@ -36,6 +36,7 @@ function IssueForm({ issue }: { issue?: Issue }) {
     try {
       await makeApiCall(data);
       router.push("/issues");
+      router.refresh();
     } catch (error) {
       setError("Unexpected error occured");
     }
