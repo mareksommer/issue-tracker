@@ -70,7 +70,7 @@ function IssueForm({ issue }: { issue?: Issue }) {
         <Controller
           name="description"
           control={control}
-          defaultValue={issue?.description}
+          defaultValue={issue?.description ?? ""}
           render={({ field }) => (
             <SimpleMDE {...field} placeholder="description" />
           )}
