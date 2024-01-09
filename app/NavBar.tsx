@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GoBug } from "react-icons/go";
 import classnames from "classnames";
+import { useSession } from "next-auth/react";
+import { Box } from "@radix-ui/themes";
 
 function NavBar() {
   const currentPath = usePathname();
@@ -11,6 +13,8 @@ function NavBar() {
     { label: "Dashboard", href: "/" },
     { label: "Issues", href: "/issues" },
   ];
+  const { status, data: session } = useSession();
+
   return (
     <nav className="flex space-x-6 border-b mb-5 px-5 h-14 items-center">
       <Link href="/">
@@ -34,6 +38,14 @@ function NavBar() {
           );
         })}
       </ul>
+      <Box>
+        {status === "authenticated" && (
+          <Link href="/api/auth/signout">Logout</Link>
+        )}
+        {status === "unauthenticated" && (
+          <Link href="/api/auth/signin">Login</Link>
+        )}
+      </Box>
     </nav>
   );
 }
