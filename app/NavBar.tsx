@@ -54,11 +54,12 @@ function NavBar() {
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                   <Avatar
+                    className="cursor-pointer"
                     src={session.user!.image!}
                     fallback="?"
                     size="2"
                     radius="full"
-                    className="cursor-pointer"
+                    referrerPolicy="no-referrer"
                   />
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content align="end">
