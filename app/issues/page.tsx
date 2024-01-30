@@ -2,20 +2,57 @@ import prisma from "@/prisma/client";
 import { Table } from "@radix-ui/themes";
 import { Link, IssueStatusBadge } from "@/app/components";
 import IssueActions from "./IssueActions";
-import { Status } from "@prisma/client";
-
+import { Issue, Status } from "@prisma/client";
+import NextLink from "next/link";
+import { ArrowDownIcon, ArrowUpIcon } from "@radix-ui/react-icons";
 interface Props {
-  searchParams: { status?: Status };
+  searchParams: {
+    status?: Status;
+    orderBy?: keyof Issue;
+    sortOrder?: "asc" | "desc";
+  };
 }
 
 async function IssuesPage({ searchParams }: Props) {
-  const statuses = Object.values(Status)
-  const status = statuses.includes(searchParams.status) ? searchParams.status : undefined
+  const columns: { label: string; value: keyof Issue; className?: string }[] = [
+    { label: "Issue", value: "title" },
+    { label: "Status", value: "status", className: "hidden md:table-cell" },
+    { label: "Created", value: "createdAt", className: "hidden md:table-cell" },
+  ];
+
+  const statuses = Object.values(Status);
+  const status = statuses.includes(searchParams.status)
+    ? searchParams.status
+    : undefined;
+  const getOrderBy = () => {
+    if (!searchParams.orderBy) return undefined;
+    if (!columns.map((column) => column.value).includes(searchParams.orderBy))
+      return undefined;
+
+    return {
+      [searchParams.orderBy]: getSortOrder(),
+    };
+  };
+  const getSortOrder = () => {
+    const defaultSortOrder = "asc";
+    if (!searchParams.sortOrder) return defaultSortOrder;
+    if (searchParams.sortOrder !== "asc" && searchParams.sortOrder !== "desc")
+      return defaultSortOrder;
+    return searchParams.sortOrder;
+  };
   const issues = await prisma.issue.findMany({
     where: {
       status: status,
     },
+    orderBy: getOrderBy(),
   });
+
+  const getArrowIcon = (column: keyof Issue) => {
+    if (column !== searchParams.orderBy) return null;
+    if (searchParams.sortOrder === "asc")
+      return <ArrowUpIcon className="inline" />;
+    return <ArrowDownIcon className="inline" />;
+  };
 
   return (
     <div>
@@ -24,13 +61,27 @@ async function IssuesPage({ searchParams }: Props) {
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Issue</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              Status
-            </Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden md:table-cell">
-              Created
-            </Table.ColumnHeaderCell>
+            {columns.map((column) => (
+              <Table.ColumnHeaderCell
+                key={column.value}
+                className={column.className}
+              >
+                <NextLink
+                  href={{
+                    pathname: "/issues",
+                    query: {
+                      ...searchParams,
+                      orderBy: column.value,
+                      sortOrder:
+                        searchParams.sortOrder === "asc" ? "desc" : "asc",
+                    },
+                  }}
+                >
+                  {column.label}
+                </NextLink>
+                {getArrowIcon(column.value)}
+              </Table.ColumnHeaderCell>
+            ))}
           </Table.Row>
         </Table.Header>
         <Table.Body>
