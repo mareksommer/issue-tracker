@@ -5,11 +5,13 @@ import IssueActions from "./IssueActions";
 import { Issue, Status } from "@prisma/client";
 import NextLink from "next/link";
 import { ArrowDownIcon, ArrowUpIcon } from "@radix-ui/react-icons";
+import Pagination from "../components/Pagination";
 interface Props {
   searchParams: {
     status?: Status;
     orderBy?: keyof Issue;
     sortOrder?: "asc" | "desc";
+    page?: string;
   };
 }
 
@@ -33,6 +35,10 @@ async function IssuesPage({ searchParams }: Props) {
       [searchParams.orderBy]: getSortOrder(),
     };
   };
+  const where = {
+    status: status,
+  }
+
   const getSortOrder = () => {
     const defaultSortOrder = "asc";
     if (!searchParams.sortOrder) return defaultSortOrder;
@@ -40,11 +46,19 @@ async function IssuesPage({ searchParams }: Props) {
       return defaultSortOrder;
     return searchParams.sortOrder;
   };
+
+  const page = parseInt(searchParams.page || "1");
+  const pageSize = 10;
+
   const issues = await prisma.issue.findMany({
-    where: {
-      status: status,
-    },
+    where,
     orderBy: getOrderBy(),
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+
+  const issueCount = await prisma.issue.count({
+    where
   });
 
   const getArrowIcon = (column: keyof Issue) => {
@@ -103,6 +117,8 @@ async function IssuesPage({ searchParams }: Props) {
           ))}
         </Table.Body>
       </Table.Root>
+
+      <Pagination itemCount={issueCount} pageSize={pageSize} currentPage={page} />
     </div>
   );
 }
